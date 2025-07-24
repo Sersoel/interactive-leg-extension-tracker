@@ -6,7 +6,7 @@ import cv2
 import time
 import mediapipe as mp
 
-from src.utils.pose import is_leg_extended, get_center_of_gravity, get_ankle_x
+from src.utils.pose import get_center_of_gravity, get_ankle_x
 from src.core.tracker import LegState
 from src.utils.audio import init_audio_system, load_victory_sound, play_victory_sound
 from src.config import MAX_REPS, LEG_HOLD_THRESHOLD_SEC
@@ -62,6 +62,7 @@ while cap.isOpened():
                 cv2.LINE_AA
             )
 
+            # === Use percentage (instead of is_leg_extended) ===
             if percentage >= 100 and not leg_obj.is_extended:
                 leg_obj.start_extension()
 
@@ -74,6 +75,18 @@ while cap.isOpened():
 
             elif percentage < 100:
                 leg_obj.reset_extension()
+
+        # === Overlay rep counter on screen ===
+        cv2.putText(
+            frame,
+            f"Left: {left_leg.reps}/{MAX_REPS}   Right: {right_leg.reps}/{MAX_REPS}",
+            (50, 50),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (255, 255, 255),
+            2,
+            cv2.LINE_AA
+        )
 
         # Check for completion
         if left_leg.reps >= MAX_REPS and right_leg.reps >= MAX_REPS:
