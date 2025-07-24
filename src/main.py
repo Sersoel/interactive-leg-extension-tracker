@@ -6,7 +6,7 @@ import cv2
 import time
 import mediapipe as mp
 
-from src.utils.pose import is_leg_extended
+from src.utils.pose import is_leg_extended, get_center_of_gravity, get_ankle_x
 from src.core.tracker import LegState
 from src.utils.audio import init_audio_system, load_victory_sound, play_victory_sound
 from src.config import MAX_REPS, LEG_HOLD_THRESHOLD_SEC
@@ -35,21 +35,44 @@ while cap.isOpened():
 
     if results.pose_landmarks:
         height, width, _ = frame.shape
+        cog_x = get_center_of_gravity(results.pose_landmarks)
 
         for leg_name, leg_obj in [("left", left_leg), ("right", right_leg)]:
-            extended = is_leg_extended(results.pose_landmarks, leg_name, width)
+            ankle_x = get_ankle_x(results.pose_landmarks, leg_name)
+            if ankle_x is None:
+                continue
 
-            if extended and not leg_obj.is_extended:
+            pixel_distance = abs((ankle_x - cog_x) * width)
+            pixel_threshold = 0.15 * width  # using EXTENSION_X_THRESHOLD directly
+            percentage = min(int((pixel_distance / pixel_threshold) * 100), 100)
+
+            # === Draw circle overlay with percentage ===
+            center = (100, 200) if leg_name == "left" else (width - 100, 200)
+            radius = 50
+            color = (0, 255, 0) if percentage >= 100 else (0, 165, 255)
+            cv2.circle(frame, center, radius, color, 3)
+            cv2.putText(
+                frame,
+                f"{percentage}%",
+                (center[0] - 25, center[1] + 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.8,
+                color,
+                2,
+                cv2.LINE_AA
+            )
+
+            if percentage >= 100 and not leg_obj.is_extended:
                 leg_obj.start_extension()
 
-            elif extended and leg_obj.is_extended:
+            elif percentage >= 100 and leg_obj.is_extended:
                 hold_time = time.time() - leg_obj.start_time
                 if hold_time >= LEG_HOLD_THRESHOLD_SEC:
                     leg_obj.increment_reps()
                     leg_obj.reset_extension()
                     print(f"\n {leg_name.title()} leg: Repetition {leg_obj.reps}/{MAX_REPS}")
 
-            elif not extended:
+            elif percentage < 100:
                 leg_obj.reset_extension()
 
         # Check for completion
