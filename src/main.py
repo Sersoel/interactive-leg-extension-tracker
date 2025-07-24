@@ -3,6 +3,7 @@ main.py – Entry point for the interactive leg extension exercise system.
 """
 
 import cv2
+import time
 import mediapipe as mp
 
 from src.utils.pose import is_leg_extended
