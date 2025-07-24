@@ -6,9 +6,6 @@ __pycache__/
 venv/
 .env/
 
-# sound files
-*.mp3
-
 #OS files
 .DS_Store
 Thumbs.db
