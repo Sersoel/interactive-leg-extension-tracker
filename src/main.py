@@ -24,6 +24,8 @@ right_leg = LegState()
 
 # Open camera
 cap = cv2.VideoCapture(0)
+cv2.namedWindow("Leg Extension Tracker", cv2.WND_PROP_FULLSCREEN)
+cv2.setWindowProperty("Leg Extension Tracker", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
 while cap.isOpened():
     success, frame = cap.read()
@@ -97,7 +99,7 @@ while cap.isOpened():
             # Show success message
             cv2.putText(
                 frame,
-                "\U0001F389 Great Job!",
+                "Great Job!",
                 (int(width / 2) - 150, int(height / 2)),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 2,
