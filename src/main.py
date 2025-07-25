@@ -5,6 +5,7 @@ main.py – Entry point for the interactive leg extension exercise system.
 import cv2
 import time
 import mediapipe as mp
+import pygame
 
 from src.utils.pose import get_center_of_gravity, get_ankle_x
 from src.core.tracker import LegState
@@ -88,10 +89,27 @@ while cap.isOpened():
             cv2.LINE_AA
         )
 
-        # Check for completion
+        # === Completion check ===
         if left_leg.reps >= MAX_REPS and right_leg.reps >= MAX_REPS:
             print("\n Exercise complete!")
             play_victory_sound()
+
+            # Show success message
+            cv2.putText(
+                frame,
+                "\U0001F389 Great Job!",
+                (int(width / 2) - 150, int(height / 2)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                2,
+                (0, 255, 0),
+                4,
+                cv2.LINE_AA
+            )
+
+            # Loop while sound is playing
+            while pygame.mixer.music.get_busy():
+                cv2.imshow("Leg Extension Tracker", frame)
+                cv2.waitKey(100)
             break
 
         # Draw landmarks
