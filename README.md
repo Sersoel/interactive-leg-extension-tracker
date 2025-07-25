@@ -19,20 +19,22 @@ A real-time interactive exercise tracker that monitors leg extensions using your
 
 ## Project Structure
 
+```text
 interactive-leg-extension/
 ├── assets/
 │   └── sounds/
 │       └── victory.mp3
 ├── src/
-│   ├── main.py                  # Main executable script
-│   ├── config.py                # Pose indices and thresholds
+│   ├── main.py          # Main executable script
+│   ├── config.py        # Pose indices and thresholds
 │   ├── core/
-│   │   └── tracker.py           # LegState class for rep tracking
-│   ├── utils/
-│   │   ├── pose.py              # COG and stretch logic
-│   │   └── audio.py             # Pygame audio handling
+│   │   └── tracker.py   # LegState class for rep tracking
+│   └── utils/
+│       ├── pose.py      # COG and stretch logic
+│       └── audio.py     # Pygame audio handling
 ├── requirements.txt
 └── README.md
+```
 
 ---
 
@@ -42,13 +44,13 @@ interactive-leg-extension/
 
 ```bash
 git clone https://github.com/sersoel/interactive-leg-extension.git
-cd interactive-leg-extension
+cd interactive-leg-extension-tracker
 ```
 
 ### 2. Set up a virtual environment (recommended)
 
 ```bash
-python -m venv .venv
+python -m venv venv
 source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 ```
 
@@ -119,7 +121,8 @@ Powered by [MediaPipe](https://github.com/google/mediapipe), [OpenCV](https://gi
 ---
 
 ## Future Enhancements
-	-	Add GUI start/stop controls
-	-	Save session summaries to CSV
-	-	Export rep logs per user
-	-	Add sound feedback per rep
+
+- Add GUI start/stop controls
+- Save session summaries to CSV
+- Export rep logs per user
+- Add sound feedback per rep
