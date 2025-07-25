@@ -10,7 +10,7 @@ import pygame
 from src.utils.pose import get_center_of_gravity, get_ankle_x
 from src.core.tracker import LegState
 from src.utils.audio import init_audio_system, load_victory_sound, play_victory_sound
-from src.config import MAX_REPS, LEG_HOLD_THRESHOLD_SEC
+from src.config import MAX_REPS, LEG_HOLD_THRESHOLD_SEC, LEFT_HIP, RIGHT_HIP, LEFT_ANKLE, RIGHT_ANKLE
 
 # === Initialize Modules ===
 mp_drawing = mp.solutions.drawing_utils
@@ -38,6 +38,29 @@ while cap.isOpened():
 
     if results.pose_landmarks:
         height, width, _ = frame.shape
+
+        # === Visibility check ===
+        landmarks = results.pose_landmarks.landmark
+        if (
+            landmarks[LEFT_HIP].visibility < 0.7 or
+            landmarks[RIGHT_HIP].visibility < 0.7 or
+            landmarks[LEFT_ANKLE].visibility < 0.7 or
+            landmarks[RIGHT_ANKLE].visibility < 0.7
+        ):
+            cv2.putText(
+                frame,
+                "Ensure your hips and legs are visible",
+                (50, height - 130),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.8,
+                (0, 0, 255),
+                2,
+                cv2.LINE_AA
+            )
+            cv2.imshow("Leg Extension Tracker", frame)
+            cv2.waitKey(10)
+            continue
+
         cog_x = get_center_of_gravity(results.pose_landmarks)
 
         for leg_name, leg_obj in [("left", left_leg), ("right", right_leg)]:
@@ -46,10 +69,9 @@ while cap.isOpened():
                 continue
 
             pixel_distance = abs((ankle_x - cog_x) * width)
-            pixel_threshold = 0.15 * width  # using EXTENSION_X_THRESHOLD directly
+            pixel_threshold = 0.15 * width
             percentage = min(int((pixel_distance / pixel_threshold) * 100), 100)
 
-            # === Draw circle overlay with percentage ===
             center = (100, 200) if leg_name == "left" else (width - 100, 200)
             radius = 50
             color = (0, 255, 0) if percentage >= 100 else (0, 165, 255)
@@ -65,7 +87,6 @@ while cap.isOpened():
                 cv2.LINE_AA
             )
 
-            # === Use percentage (instead of is_leg_extended) ===
             if percentage >= 100 and not leg_obj.is_extended:
                 leg_obj.start_extension()
 
@@ -79,7 +100,6 @@ while cap.isOpened():
             elif percentage < 100:
                 leg_obj.reset_extension()
 
-        # === Overlay rep counter on screen ===
         cv2.putText(
             frame,
             f"Left: {left_leg.reps}/{MAX_REPS}   Right: {right_leg.reps}/{MAX_REPS}",
@@ -91,12 +111,10 @@ while cap.isOpened():
             cv2.LINE_AA
         )
 
-        # === Completion check ===
         if left_leg.reps >= MAX_REPS and right_leg.reps >= MAX_REPS:
             print("\n Exercise complete!")
             play_victory_sound()
 
-            # Show success message
             cv2.putText(
                 frame,
                 "Great Job!",
@@ -108,13 +126,11 @@ while cap.isOpened():
                 cv2.LINE_AA
             )
 
-            # Loop while sound is playing
             while pygame.mixer.music.get_busy():
                 cv2.imshow("Leg Extension Tracker", frame)
                 cv2.waitKey(100)
             break
 
-        # Draw landmarks
         mp_drawing.draw_landmarks(
             frame, results.pose_landmarks, mp.solutions.pose.POSE_CONNECTIONS
         )
@@ -125,6 +141,5 @@ while cap.isOpened():
         print("\n Interrupted by user.")
         break
 
-# Release resources
 cap.release()
 cv2.destroyAllWindows()
