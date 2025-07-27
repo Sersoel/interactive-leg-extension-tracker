@@ -6,7 +6,7 @@ A real-time interactive exercise tracker that monitors leg extensions using your
 
 ## Features
 
-- Real-time pose tracking using [MediaPipe Pose](https://developers.google.com/mediapipe/solutions/vision/pose)
+- Real-time pose tracking using [MediaPipe Pose](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker)
 - Detects leg extensions based on hip-to-ankle distance from center of gravity (COG)
 - Requires you to hold each stretch for **3 seconds** to count a rep
 - Stretch progress visualized as a circle with live percentage
